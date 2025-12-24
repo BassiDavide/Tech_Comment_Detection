@@ -1,0 +1,53 @@
+=== Inclusion summary ===
+Common folders (intersection): 525
+
+=== Span IAA (pygamma-agreement) ===
+gamma (identification): 0.5047
+gamma_cat (classification): 0.3911
+gamma (combined classification dissim): 0.5003
+categories observed: 19
+
+gamma_k (per label):
+  smears/doubt                             0.4374
+  name calling                             0.4257
+  slogans                                  0.4177
+  causal oversimplification                0.3957
+  appeal to popularity (bandwagon)         0.3885
+  appeal to pity                           0.3583
+  thought-terminating cliché               0.3366
+  appeal to values/flag waving             0.3056
+  black-and-white fallacy                  0.2987
+  repetition                               0.2944
+  appeal to hypocrisy (to quoque)          0.2818
+  exaggeration or minimisation             0.2730
+  appeal to authority                      0.2723
+  reductio ad hitlerum                     0.2705
+  appeal to time                           0.2633
+  loaded language                          0.2366
+  appeal to fear, prejudice                0.2172
+  distraction                              0.2105
+  intentional vagueness                    0.0646
+
+=== Comment-level IAA (presence/absence per technique) ===
+Krippendorff's alpha (overall multilabel presence): 0.5722
+
+Cohen's kappa by technique:
+  slogans                                  kappa=0.5985  support_A=  30 support_B=  28
+  appeal to popularity (bandwagon)         kappa=0.5883  support_A=  16 support_B=  14
+  causal oversimplification                kappa=0.5676  support_A=  55 support_B=  65
+  appeal to pity                           kappa=0.5331  support_A=  28 support_B=  19
+  thought-terminating cliché               kappa=0.5232  support_A=  85 support_B=  79
+  reductio ad hitlerum                     kappa=0.5182  support_A=   7 support_B=  12
+  repetition                               kappa=0.5067  support_A=  28 support_B=  39
+  smears/doubt                             kappa=0.4926  support_A= 210 support_B= 241
+  appeal to authority                      kappa=0.4828  support_A=  15 support_B=  21
+  name calling                             kappa=0.4781  support_A= 319 support_B= 307
+  loaded language                          kappa=0.4296  support_A= 134 support_B= 242
+  appeal to hypocrisy (to quoque)          kappa=0.4276  support_A=  54 support_B=  31
+  black-and-white fallacy                  kappa=0.4275  support_A=  63 support_B=  55
+  exaggeration or minimisation             kappa=0.4240  support_A=  43 support_B=  42
+  appeal to values/flag waving             kappa=0.4088  support_A=  88 support_B=  89
+  appeal to fear, prejudice                kappa=0.3680  support_A=  69 support_B=  91
+  appeal to time                           kappa=0.3570  support_A=   6 support_B=   5
+  distraction                              kappa=0.3268  support_A=  17 support_B=  12
+  intentional vagueness                    kappa=0.2995  support_A=   5 support_B=   8
