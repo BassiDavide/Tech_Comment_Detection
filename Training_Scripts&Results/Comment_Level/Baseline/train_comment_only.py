@@ -34,11 +34,11 @@ if not hasattr(_im, "packages_distributions"):
 
 # Base configuration (mirrors the multitask script)
 BASE_CONFIG = {
-    "model_name": "/mnt/beegfs/home/davide.bassi/Comm_Tech/Nature/Base_Nature/comment_pre_ft_output",
-    "train_file": "/mnt/beegfs/home/davide.bassi/Comm_Tech/Data/Comments/merged_splits/train.jsonl",
-    "dev_file": "/mnt/beegfs/home/davide.bassi/Comm_Tech/Data/Comments/merged_splits/dev.jsonl",
-    "test_file": "/mnt/beegfs/home/davide.bassi/Comm_Tech/Data/Comments/merged_splits/test.jsonl",
-    "output_dir": "./CommentOnly_Nature_results",
+    "model_name": "Domain_Adaptation/deberta-youtube-adapted-large",
+    "train_file": "Data/train.jsonl",
+    "dev_file": "Data/dev.jsonl",
+    "test_file": "Data/test.jsonl",
+    "output_dir": "./CommentOnly_results",
     "logging_steps": 50,
     "eval_steps": 200,
     "save_steps": 200,

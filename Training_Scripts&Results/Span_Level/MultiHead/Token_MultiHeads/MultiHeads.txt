@@ -1,0 +1,32 @@
+Run 1: {
+  "eval_loss": 0.1960197389125824,
+  "eval_token_precision": 0.5151193633952255,
+  "eval_token_recall": 0.5132677872925256,
+  "eval_token_f1_micro": 0.5141919084939631,
+  "eval_token_f1_macro": 0.40264385331376795,
+  "eval_runtime": 9.5471,
+  "eval_samples_per_second": 27.548,
+  "eval_steps_per_second": 3.457
+}
+
+Run 2: {
+  "eval_loss": 0.18487253785133362,
+  "eval_token_precision": 0.5332113867611753,
+  "eval_token_recall": 0.49307537794692885,
+  "eval_token_f1_micro": 0.5123585631110623,
+  "eval_token_f1_macro": 0.3821316828885489,
+  "eval_runtime": 9.5349,
+  "eval_samples_per_second": 27.583,
+  "eval_steps_per_second": 3.461
+}
+
+Run 3: {
+  "eval_loss": 0.21706584095954895,
+  "eval_token_precision": 0.5853627918654281,
+  "eval_token_recall": 0.4929696585262713,
+  "eval_token_f1_micro": 0.5352080344332855,
+  "eval_token_f1_macro": 0.3988786811185371,
+  "eval_runtime": 9.5625,
+  "eval_samples_per_second": 27.503,
+  "eval_steps_per_second": 3.451
+}

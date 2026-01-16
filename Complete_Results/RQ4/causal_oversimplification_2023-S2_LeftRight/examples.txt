@@ -1,0 +1,17 @@
+Technique: causal oversimplification
+Semester: 2023-S2
+Counts (deduped): Left=8000 | Right=8000
+
+=== Random span examples from Left (deduped) ===
+- Mexico brings more poverty in the United States
+- Defending the border is the jurisdiction of the federal government, and the states aren't legally empowered to do it
+- Our infrastructure can’t handle this surge. Especially if we won’t let them work
+- since he didn't, the
+- There are more palestinians this century than last century
+
+=== Random span examples from Right (deduped) ===
+- Keep voting for democrats your kids will suffer
+- because Biden likes it because he's with Iran and Hamas, so now Hamas is building up strength and fire power to take down Israel
+- More fentanyl has been confiscated at the Border after Trump
+- GAZA is under Hamas rule
+- not turn

@@ -21,9 +21,9 @@ from transformers import (
 )
 
 from data_processing import prepare_datasets
-from model import TokenDeberta
+from model import MultiHeadTokenDeberta
 from utils import (
-    compute_span_metrics,
+    compute_token_metrics,
     compute_token_metrics_from_logits,
     compute_token_per_label_metrics,
     print_training_summary,
@@ -41,12 +41,12 @@ if not hasattr(_im, "packages_distributions"):
 
 
 BASE_CONFIG = {
-    "model_name": "/mnt/beegfs/home/davide.bassi/Comm_Tech/Domain_Adaptation/deberta-youtube-adapted-large",
+    "model_name": "Domain_Adaptation/deberta-youtube-adapted-large",
     "num_token_labels": 20,
-    "train_file": "/mnt/beegfs/home/davide.bassi/Comm_Tech/Data/Comments/Def_splits/train.jsonl",
-    "dev_file": "/mnt/beegfs/home/davide.bassi/Comm_Tech/Data/Comments/Def_splits/dev.jsonl",
-    "test_file": "/mnt/beegfs/home/davide.bassi/Comm_Tech/Data/Comments/Def_splits/test.jsonl",
-    "output_dir": "/mnt/beegfs/home/davide.bassi/Comm_Tech/Nature/2Heads_MultiToken/Span_SingleHead/Span_YT_DEF_optuna_results",
+    "train_file": "Data/train.jsonl",
+    "dev_file": "Data/Def_splits/dev.jsonl",
+    "test_file": "Data/Def_splits/test.jsonl",
+    "output_dir": "/Span_MultiHead_optuna_results",
     "warmup_ratio": 0.1,
     "weight_decay": 0.01,
     "fp16": torch.cuda.is_available(),
@@ -56,7 +56,7 @@ BASE_CONFIG = {
     "save_total_limit": 1,
 }
 
-LABEL_LIST = [
+TECHNIQUE_LABELS = [
     "appeal to authority",
     "appeal to fear, prejudice",
     "appeal to hypocrisy (to quoque)",
@@ -77,6 +77,9 @@ LABEL_LIST = [
     "smears/doubt",
     "thought-terminating cliché",
 ]
+
+LABEL_LIST = TECHNIQUE_LABELS + ["none"]
+NONE_LABEL_INDEX = len(LABEL_LIST) - 1
 
 BASE_CONFIG["num_token_labels"] = len(LABEL_LIST)
 
@@ -269,10 +272,11 @@ class DelayedEarlyStoppingCallback(EarlyStoppingCallback):
 
 def objective(trial: Trial, tokenizer):
     """
-    Optuna objective function for span-level optimization.
+    Optuna objective function for multi-head span detection.
     """
     set_seed(42)
     max_length = trial.suggest_int("max_length", 256, 512, step=64)
+    head_dim = trial.suggest_categorical("head_dim", [48, 64, 96])
     batch_size = trial.suggest_categorical("batch_size", [4, 8, 16])
     gradient_accumulation_steps = trial.suggest_categorical("gradient_accumulation_steps", [1, 2, 4])
     learning_rate = trial.suggest_float("learning_rate", 1e-5, 3e-5, log=True)
@@ -313,9 +317,10 @@ def objective(trial: Trial, tokenizer):
     config.hidden_dropout_prob = dropout_prob
     config.attention_probs_dropout_prob = dropout_prob
 
-    model = TokenDeberta(
+    model = MultiHeadTokenDeberta(
         config=config,
         num_token_labels=BASE_CONFIG["num_token_labels"],
+        head_dim=head_dim,
         pretrained_model_name=BASE_CONFIG["model_name"],
     )
     model.set_pos_weight(pos_weight)
@@ -367,7 +372,7 @@ def objective(trial: Trial, tokenizer):
     )
 
     def compute_metrics_fn(eval_pred: EvalPrediction):
-        return compute_span_metrics(eval_pred, threshold=threshold)
+        return compute_token_metrics(eval_pred, threshold=threshold, ignore_label_indices=NONE_LABEL_INDEX)
 
     trainer = TokenTrainerWrapper(
         model=model,
@@ -419,10 +424,10 @@ def objective(trial: Trial, tokenizer):
 
 def run_optimization(n_trials=20, n_jobs=1):
     """
-    Run Optuna optimization for span-level detection.
+    Run Optuna optimization for multi-head span detection.
     """
     print("=" * 80)
-    print("SPAN-LEVEL HYPERPARAMETER OPTIMIZATION WITH OPTUNA")
+    print("MULTI-HEAD SPAN OPTIMIZATION WITH OPTUNA")
     print("=" * 80)
     print("\nBase Configuration:")
     for key, value in BASE_CONFIG.items():
@@ -430,7 +435,7 @@ def run_optimization(n_trials=20, n_jobs=1):
     print("\nOptimization Settings:")
     print(f"  Number of trials: {n_trials}")
     print(f"  Number of jobs: {n_jobs}")
-    print("  Optimization metric: token_f1_macro")
+    print("  Optimization metric: token_f1_macro (excluding none)")
     print("=" * 80 + "\n")
 
     os.makedirs(BASE_CONFIG["output_dir"], exist_ok=True)
@@ -441,7 +446,7 @@ def run_optimization(n_trials=20, n_jobs=1):
 
     study = optuna.create_study(
         direction="maximize",
-        study_name="span_deberta_optimization",
+        study_name="span_multihead_optimization",
         storage=f"sqlite:///{BASE_CONFIG['output_dir']}/optuna_study.db",
         load_if_exists=True,
         sampler=optuna.samplers.TPESampler(seed=42),
@@ -588,8 +593,9 @@ def tune_token_threshold_on_dev(trainer, dev_dataset, base_threshold: float, gri
         metrics = compute_token_metrics_from_logits(
             token_logits,
             token_labels,
-            attention_mask=attention_mask,
+            attention_mask,
             threshold=thr,
+            ignore_label_indices=NONE_LABEL_INDEX,
         )
         f1 = metrics.get("token_f1_macro", 0.0)
         if f1 > best_f1:
@@ -603,11 +609,11 @@ def evaluate_best_trial_on_test():
     Evaluate the best Optuna trial checkpoint on the test set without retraining.
     """
     print("\n" + "=" * 80)
-    print("EVALUATING BEST OPTUNA TRIAL ON TEST SET (SPAN)")
+    print("EVALUATING BEST OPTUNA TRIAL ON TEST SET (MULTI-HEAD)")
     print("=" * 80)
 
     study = optuna.load_study(
-        study_name="span_deberta_optimization",
+        study_name="span_multihead_optimization",
         storage=f"sqlite:///{BASE_CONFIG['output_dir']}/optuna_study.db",
     )
     best_trial = study.best_trial
@@ -639,15 +645,13 @@ def evaluate_best_trial_on_test():
     )
 
     config = AutoConfig.from_pretrained(best_checkpoint)
-    model = TokenDeberta.from_pretrained(
+    model = MultiHeadTokenDeberta.from_pretrained(
         best_checkpoint,
         config=config,
         num_token_labels=BASE_CONFIG["num_token_labels"],
-        pretrained_model_name=BASE_CONFIG["model_name"],
+        head_dim=best_trial.params.get("head_dim", 64),
     )
     model.set_pos_weight(pos_weight)
-    if model.pos_weight is not None:
-        print("Token pos_weight:", model.pos_weight.detach().cpu())
 
     eval_output_dir = trial_dir / "test_eval"
     eval_output_dir.mkdir(parents=True, exist_ok=True)
@@ -664,7 +668,11 @@ def evaluate_best_trial_on_test():
         model=model,
         args=eval_args,
         eval_dataset=test_dataset,
-        compute_metrics=lambda pred: compute_span_metrics(pred, threshold=threshold),
+        compute_metrics=lambda pred: compute_token_metrics(
+            pred,
+            threshold=threshold,
+            ignore_label_indices=NONE_LABEL_INDEX,
+        ),
     )
 
     tuned_threshold, tuned_dev_f1 = tune_token_threshold_on_dev(
@@ -675,7 +683,11 @@ def evaluate_best_trial_on_test():
     else:
         print(f"Using base threshold {tuned_threshold:.2f}")
     threshold = tuned_threshold
-    trainer.compute_metrics = lambda pred: compute_span_metrics(pred, threshold=threshold)
+    trainer.compute_metrics = lambda pred: compute_token_metrics(
+        pred,
+        threshold=threshold,
+        ignore_label_indices=NONE_LABEL_INDEX,
+    )
 
     print("\nRunning test evaluation...")
     test_results = trainer.evaluate(test_dataset)
@@ -687,28 +699,22 @@ def evaluate_best_trial_on_test():
         }
         json.dump(results_serializable, f, indent=2)
 
-    print("Generating test predictions...")
     test_predictions = trainer.predict(test_dataset)
     token_logits = test_predictions.predictions
-    token_probs = torch.sigmoid(torch.from_numpy(token_logits)).numpy()
-    token_preds = (token_probs > threshold).astype(int)
-
-    np.save(eval_output_dir / "test_token_probs.npy", token_probs)
-    np.save(eval_output_dir / "test_token_predictions.npy", token_preds)
-
     label_ids = test_predictions.label_ids
     if isinstance(label_ids, (list, tuple)) and len(label_ids) == 2:
         token_labels, attention_mask = label_ids
     else:
         token_labels = label_ids
-        attention_mask = np.ones(token_labels.shape[:2], dtype=bool)
+        attention_mask = None
 
     per_label_metrics = compute_token_per_label_metrics(
         token_logits,
         token_labels,
-        attention_mask=attention_mask,
+        attention_mask,
         label_list=LABEL_LIST,
         threshold=threshold,
+        ignore_label_indices=NONE_LABEL_INDEX,
     )
 
     with open(eval_output_dir / "test_token_per_label.json", "w") as f:
@@ -727,14 +733,14 @@ def train_with_best_params(study=None, test_dataset=None, seed: int = 42, output
     """
     if study is None:
         study = optuna.load_study(
-            study_name="span_deberta_optimization",
+            study_name="span_multihead_optimization",
             storage=f"sqlite:///{BASE_CONFIG['output_dir']}/optuna_study.db",
         )
     set_seed(seed)
     best_params = study.best_params
 
     print("\n" + "=" * 80)
-    print("TRAINING FINAL SPAN MODEL WITH BEST PARAMETERS")
+    print("TRAINING FINAL MULTI-HEAD MODEL WITH BEST PARAMETERS")
     print("=" * 80)
     print(f"\nBest parameters (F1 Macro: {study.best_value:.4f}):")
     for key, value in best_params.items():
@@ -762,14 +768,13 @@ def train_with_best_params(study=None, test_dataset=None, seed: int = 42, output
     config.hidden_dropout_prob = best_params["dropout_prob"]
     config.attention_probs_dropout_prob = best_params["dropout_prob"]
 
-    model = TokenDeberta(
+    model = MultiHeadTokenDeberta(
         config=config,
         num_token_labels=BASE_CONFIG["num_token_labels"],
+        head_dim=best_params.get("head_dim", 64),
         pretrained_model_name=BASE_CONFIG["model_name"],
     )
     model.set_pos_weight(pos_weight)
-    if model.pos_weight is not None:
-        print("Token pos_weight:", model.pos_weight.detach().cpu())
     freeze_bottom_layers(model, num_layers_to_freeze=6)
 
     final_output_dir = f"{BASE_CONFIG['output_dir']}/{output_suffix}"
@@ -820,7 +825,11 @@ def train_with_best_params(study=None, test_dataset=None, seed: int = 42, output
     )
 
     def compute_metrics_fn(eval_pred: EvalPrediction):
-        return compute_span_metrics(eval_pred, threshold=best_params["threshold"])
+        return compute_token_metrics(
+            eval_pred,
+            threshold=best_params["threshold"],
+            ignore_label_indices=NONE_LABEL_INDEX,
+        )
 
     trainer = TokenTrainerWrapper(
         model=model,
@@ -849,7 +858,11 @@ def train_with_best_params(study=None, test_dataset=None, seed: int = 42, output
         print(f"[Threshold] Tuned on dev: {tuned_threshold:.2f} (F1_macro={tuned_dev_f1:.3f})")
     else:
         print(f"[Threshold] Using base threshold {tuned_threshold:.2f}")
-    trainer.compute_metrics = lambda pred: compute_span_metrics(pred, threshold=tuned_threshold)
+    trainer.compute_metrics = lambda pred: compute_token_metrics(
+        pred,
+        threshold=tuned_threshold,
+        ignore_label_indices=NONE_LABEL_INDEX,
+    )
 
     print("\nSaving final model...")
     trainer.save_model(final_output_dir)
@@ -876,14 +889,6 @@ def train_with_best_params(study=None, test_dataset=None, seed: int = 42, output
         }
         json.dump(results_serializable, f, indent=2)
 
-    test_predictions = trainer.predict(test_dataset)
-    token_logits = test_predictions.predictions
-    token_probs = torch.sigmoid(torch.tensor(token_logits)).numpy()
-    token_preds = (token_probs > tuned_threshold).astype(int)
-
-    np.save(f"{final_output_dir}/test_token_predictions.npy", token_preds)
-    np.save(f"{final_output_dir}/test_token_probabilities.npy", token_probs)
-
     print(f"\n{'='*80}")
     print(f"Final model saved to: {final_output_dir}")
     print(f"{'='*80}\n")
@@ -896,7 +901,7 @@ def run_best_multiple_times(n_runs: int = 3, base_seed: int = 42):
     Re-train/evaluate the best Optuna setting multiple times to report mean/std.
     """
     study = optuna.load_study(
-        study_name="span_deberta_optimization",
+        study_name="span_multihead_optimization",
         storage=f"sqlite:///{BASE_CONFIG['output_dir']}/optuna_study.db",
     )
     run_metrics = []
@@ -928,7 +933,7 @@ def run_best_multiple_times(n_runs: int = 3, base_seed: int = 42):
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Hyperparameter optimization for span-level propaganda detection")
+    parser = argparse.ArgumentParser(description="Multi-head span optimization for propaganda detection")
     parser.add_argument("--n_trials", type=int, default=20, help="Number of optimization trials")
     parser.add_argument("--n_jobs", type=int, default=1, help="Number of parallel jobs")
     parser.add_argument("--train_final", action="store_true", help="Train final model with best params after optimization")

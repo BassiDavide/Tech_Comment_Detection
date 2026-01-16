@@ -1,0 +1,11 @@
+{
+  "max_length": 512,
+  "learning_rate": 2.2404526765683964e-05,
+  "batch_size": 4,
+  "gradient_accumulation_steps": 2,
+  "num_epochs": 14,
+  "dropout_prob": 0.1,
+  "weight_decay": 0.02,
+  "freeze_layers": 4,
+  "threshold": 0.2
+}
