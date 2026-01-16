@@ -1,0 +1,179 @@
+Questions:
+1. For what purpose was the dataset created?
+The dataset has been created for the research project "Recurring Techniques, Shifting Meanings: Analyzing Divisive Rhetoric in YouTube Immigration Debates Over Time"  where the main goal was to provide an understanding of YouTube controversial discussions about Immigration.
+
+2. Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)?
+Dataset was created by the research paper authors (ANONYMOUS FOR PEER REVIEW)
+
+3. Who funded the creation of the dataset?
+(ANONYMOUS FOR PEER REVIEW)
+
+4. Any other comments? 
+None.
+
+5. What do the instances that comprise the dataset represent (e.g.,
+documents, photos, people, countries)? 
+Datasets consists of YouTube comments, with comment text, and other metadata related to the time of posting and video information. 
+
+6. How many instances are there in total (of each type, if appropriate)?
+The dataset comprises 3499 videos, for a total of 1.673.351 comments
+
+7. Does the dataset contain all possible instances or is it a sample
+(not necessarily random) of instances from a larger set?
+It contains all the crawled comments.
+
+8. What data does each instance consist of?
+{"CommentID","VideoID","CommentText","AuthorName"[anonymized],"NumberOfLikes","Timestamp","ChannelLeaning","Source","PeriodTimestamp","VideoTitle","predicted_stance"}
+
+9. Is there a label or target associated with each instance?
+Yes, the predicted/labeled stance of the entry  
+
+10. Is any information missing from individual instances? 
+No.
+
+11.  Are relationships between individual instances made explicit
+(e.g., users’ movie ratings, social network links)?
+There are no relationships between different pages/groups.
+
+12. Are there recommended data splits (e.g., training, development/validation,
+testing)?
+Yes, they are present in separated files
+
+13.  Are there any errors, sources of noise, or redundancies in the
+dataset?
+No, there are not.
+
+14. Is the dataset self-contained, or does it link to or otherwise rely on
+external resources (e.g., websites, tweets, other datasets)? 
+No, the dataset can be used as it is
+
+15. Does the dataset contain data that might be considered confidential (e.g., data that is protected by legal privilege or by doctor–
+patient confidentiality, data that includes the content of individuals’ non-public communications)?
+No.
+
+16. Does the dataset contain data that, if viewed directly, might be offensive, insulting, threatening, or might otherwise cause anxiety?
+Yes, some comments contain hatespeech and, more in general, toxic language. 
+
+17. Does the dataset identify any subpopulations (e.g., by age, gender)?
+No.
+
+18. Is it possible to identify individuals (i.e., one or more natural persons), either directly or indirectly (i.e., in combination with other
+data) from the dataset? 
+If the whole dataset is extracted, it is possible to identify users who share posts in public groups. However, no identifiable information can be found.
+
+19. Does the dataset contain data that might be considered sensitive in any way (e.g., data that reveals race or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic
+data; forms of government identification, such as social security numbers; criminal history)?
+Most of the comments are about political opinion. However they are anonymized, so not identifiable.
+
+20. How was the data associated with each instance acquired?
+The data is observable (it is coming from YouTube).
+
+21. What mechanisms or procedures were used to collect the data
+(e.g., hardware apparatuses or sensors, manual human curation,
+software programs, software APIs)? 
+YouTube officila API
+
+22. If the dataset is a sample from a larger set, what was the sampling
+strategy (e.g., deterministic, probabilistic with specific sampling
+probabilities)?
+The dataset is not a part of a larger dataset.
+
+23. Who was involved in the data collection process (e.g., students,
+crowdworkers, contractors) and how were they compensated (e.g.,
+how much were crowdworkers paid)?
+Data was collected by paper authors. As stated above, no funding was provided for this project.
+
+24. Over what timeframe was the data collected? 
+January 2020 to December 2024 
+
+25. Were any ethical review processes conducted (e.g., by an institutional review board)?
+No.
+
+26. Did you collect the data from the individuals in question directly,
+or obtain it via third parties or other sources (e.g., websites)?
+We used YouYube API to Comments.
+
+27. Did the individuals in question consent to the collection and use
+of their data?
+No, as the API is restricted to only sharing publicly available posts. 
+
+28. Has an analysis of the potential impact of the dataset and its use
+on data subjects (e.g., a data protection impact analysis) been conducted?
+No.
+
+29. Was any preprocessing/cleaning/labeling of the data done (e.g., discretization or bucketing, tokenization, part-of-speech tagging, SIFT feature extraction, removal of instances, processing of missing values)?
+No
+
+30. Was the “raw” data saved in addition to the preprocessed/cleaned/labeled
+data (e.g., to support unanticipated future uses)?
+N/A
+
+31. Is the software that was used to preprocess/clean/label the data
+available?
+N/A
+
+32. Has the dataset been used for any tasks already?
+We performed stance detection and statistical analysis described in the research paper.
+
+33. Is there a repository that links to any or all papers or systems that
+use the dataset?
+This is the first paper to use this dataset. At the moment, due to anonymous peer-review, no link have been added to pre-print versions of the paper. 
+
+34. What (other) tasks could the dataset be used for?
+The data can be used for multiple tasks, like analyzing sentiments or emotions of users toward immigration at the state level, as well as improving current state-of-the-art stance detection models.
+
+35. Is there anything about the composition of the dataset or the way
+it was collected and preprocessed/cleaned/labeled that might impact future uses?
+No.
+
+36. Are there tasks for which the dataset should not be used?
+No.
+
+37. Will the dataset be distributed to third parties outside of the entity (e.g., company, institution, organization) on behalf of which
+the dataset was created?
+No.
+
+38. How will the dataset will be distributed (e.g., tarball on website,
+API, GitHub)?
+The dataset will be shared on Zenodo and GitHub.
+
+39. When will the dataset be distributed?
+Upon acceptance
+
+40. Will the dataset be distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use
+(ToU)?
+The dataset will be made public through Creative Commons Attribution 4.0 International.
+
+41. Have any third parties imposed IP-based or other restrictions on
+the data associated with the instances?
+No.
+
+42. Do any export controls or other regulatory restrictions apply to
+the dataset or to individual instances? I
+No.
+
+43. Who will be supporting/hosting/maintaining the dataset?
+The authors of the paper
+
+44. How can the owner/curator/manager of the dataset be contacted?
+Via email, which can be found in the research paper.
+
+45.Is there an erratum?
+No.
+
+46.Will the dataset be updated (e.g., to correct labeling errors, add
+new instances, delete instances)?
+No.
+
+47. If the dataset relates to people, are there applicable limits on the
+retention of the data associated with the instances (e.g., were the
+individuals in question told that their data would be retained for
+a fixed period of time and then deleted)?
+No.
+
+48. Will older versions of the dataset continue to be supported/hosted/maintained?
+Currently, there are no other versions of the dataset.
+
+49.If others want to extend/augment/build on/contribute to the
+dataset, is there a mechanism for them to do so?
+Other researchers can use the dataset for their research purposes.
