@@ -7,7 +7,6 @@ GAP_DIRECTION = "Right-Left"
 PROGRESS_EVERY = 200000
 CUTOFF_TIMESTAMP = "2024-12-31T23:59:59Z"
 TIME_GRAIN = "semester"
-ALWAYS_INCLUDE = {"appeal to hypocrisy (to quoque)"}
 FIGSIZE = (3.35, 2.6)
 OUTPUT_FORMATS = ("pdf",)
 
